@@ -1,9 +1,6 @@
 import websocket,time,thread,json,requests,logging
 logging.basicConfig()
 
-url="ws://54.245.5.208/"
-botname="mad_bot"
-key="OGU2M2NhODQtYTY2Zi00YWE1LWE5NjAtM2RjZjJlYjg4YWVjNTRkMGQwY2QtM2Fi"
 class bot():
 	def __init__(self,botname,key,url):
 		self.botname=botname
@@ -18,12 +15,11 @@ class bot():
 		r.headers["Authorization"]="Bearer " + self.key
 		response=r.get("https://api.ciscospark.com/v1/messages/"+msgid)
 		response=response.json()
-		text=response["text"].encode('utf-8')
-		print(text)
+		text=response["text"].encode('utf-8')		
 		sender=response["personId"].encode('utf-8')
-		roomid=response["roomId"].encode('utf-8')
-
+		roomid=response["roomId"].encode('utf-8')		
 		return [text,sender,roomid]
+	
 	def postmsg(self,room,text):
 		p = requests.session()
 		p.headers["Content-Type"]="application/json; charset=utf-8"
@@ -49,10 +45,9 @@ class bot():
 				botname=data["name"]
 				sender=data["data"]["personEmail"]
 				msgid=data["data"]["id"]
-				decoded=self.decodemsg(msgid)
-				print(decoded)
+				decoded=self.decodemsg(msgid)				
 				self.postmsg(decoded[2],decoded[0])
-
+				
 	def on_open(self,ws):
 		def run(*args):
 			ws.send("subscribe:"+self.botname)
