@@ -1,5 +1,6 @@
-import pandas as pd
+import pandas as pd,os
 import nltk,pickle
+os.chdir(os.getcwd())
 class apiextraction():
 	def __init__(self,filename="",load=""):
 		if load!="":
@@ -48,16 +49,26 @@ class apiextraction():
 		return self.bag_of_words(l)
     
 
-	def score(self,input_sent):
-		dist = self.classifier.prob_classify(process_sentence(input_sent))
+	def score(self,input_sent):		
+		input_sent = input_sent.lower()
+		dist = self.classifier.prob_classify(self.process_sentence(input_sent))
+		temp=[]
 		for label in dist.samples():
-		    print("%s: %f" % (label, dist.prob(label)))
+		    temp.append((label, dist.prob(label)))
+		return temp
 
 	def intent(self,input_sent):
 		dist = self.classifier.classify(self.process_sentence(input_sent))
-		return dist
-
+		prob = self.score(input_sent)
+#		print ("this is prob",prob)
+		prob = sorted(prob,key=lambda x:(-x[1],x[0]))
+		if(prob[0][1]<0.5):
+			return  "fallback"
+		else:
+			return dist
+'''
 if __name__ == "__main__":
-	var=apiextraction("dataset.csv")
+	var=apiextraction("","yes")
 	input_sent="what is the placement in VIT"
 	print(var.intent(input_sent))
+'''

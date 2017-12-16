@@ -49,10 +49,9 @@ class bot():
 				botname=data["name"]
 				sender=data["data"]["personEmail"]
 				msgid=data["data"]["id"]
-				decoded=self.decodemsg(msgid)
-				print(decoded)
+				decoded=self.decodemsg(msgid)				
 				self.postmsg(decoded[2],decoded[0])
-
+				
 	def on_open(self,ws):
 		def run(*args):
 			ws.send("subscribe:"+self.botname)
