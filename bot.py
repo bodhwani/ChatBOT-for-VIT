@@ -8,25 +8,25 @@ class bot():
 		self.botname=botname
 		self.access_code=access_code
 		self.url=url
-    ws = websocket.WebSocketApp(self.url,on_message = self.on_message,on_error = self.on_error,on_close = self.on_close)
-    ws.on_open = on_open
-    ws.run_forever()
+		ws = websocket.WebSocketApp(self.url,on_message = self.on_message,on_error = self.on_error,on_close = self.on_close)
+		ws.on_open = on_open
+		ws.run_forever()
     
 	def on_message(ws,message):
 		try:
-	    data=json.loads(message)
-	    #print(data)
-		except:			
-		  data=""
-	    botname=""
-	    sender=""
-		if data:		
-	    botname=data["name"]
-	    sender=data["data"]["personEmail"]
-	    msgid=data["data"]["id"]
-	    decoded=self.decodemsg(msgid)
-	    print(decoded)
-	    self.postmsg(decoded[2],decoded[0],key)
+			data=json.loads(message)
+		#print(data)
+		except:
+			data=""
+		botname=""
+		sender=""
+		if data:
+			botname=data["name"]
+			sender=data["data"]["personEmail"]
+			vmsgid=data["data"]["id"]
+		decoded=self.decodemsg(msgid)
+		print(decoded)
+		self.postmsg(decoded[2],decoded[0],key)
 
 	def on_error(ws, error):
 		print(error)
@@ -35,14 +35,14 @@ class bot():
 		print "### closed ###"
 
 	def on_open(ws):
-		def run(*args):			
-	    ws.send("subscribe:"+botname)
-	    while(1>0):
-        time.sleep(30)
-        ws.send("")
-	    ws.close()
-	    print("thread terminating...")
-	thread.start_new_thread(run, ())
+		def run(*args):
+			ws.send("subscribe:"+botname)
+			while(1>0):
+				stime.sleep(30)
+				ws.send("")
+			ws.close()
+			print("thread terminating...")
+		thread.start_new_thread(run, ())
 
 	def decodemsg(msgid):
 		r = requests.session()
