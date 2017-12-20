@@ -1,10 +1,10 @@
 from transitions import Machine
-import re
 class fees_FSM(object):
 
     states=['inital','hostel','academics','mess','rooms','undergraduation','postgraduation','final']
     def __init__(self, name):
         self.name = name
+        self.machine = Machine(model=self, states=fees_FSM.states, initial='initial')
         self.questions={
             "initial":"Would You like to Know Academics Fees or Hostel?: ",
             "hostel":"Would You like to Know Mess Fees or Rooms?: ",
@@ -28,11 +28,9 @@ class fees_FSM(object):
             "hostel":("mess","rooms"),
             "academics":("undergraduation","postgraduation"),
             "undergraduation":("btech","bsc","bcom","bca"),
-            "postgraduation" : ("mtech","mcom","mca","mba")
-            
-            
+            "postgraduation" : ("mtech","mcom","mca","mba")                        
         }
-        self.machine = Machine(model=self, states=fees_FSM.states, initial='initial')
+        
         self.machine.add_transition(trigger='hostel', source='initial', dest='hostel')
         self.machine.add_transition(trigger='academics', source='initial', dest='academics')
         self.machine.add_transition(trigger='mess', source='hostel', dest='final')
@@ -60,10 +58,7 @@ class fees_FSM(object):
                     if(self.state == 'final'):
                         print self.questions[str(answer)]
                     break
-            # if answer in states:
-            #     print "YEs ITS THERE"
-            #     eval("self."+answer+"()")
                 
         
 f=fees_FSM("fees")
-f.dialouge()
+f.dialouge()    
