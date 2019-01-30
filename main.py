@@ -6,9 +6,17 @@ logging.basicConfig()
 talkers={}
 ls=[]
 st=1
-url="ws://54.245.5.208/"
-botname="mad_bot"
-key="OGU2M2NhODQtYTY2Zi00YWE1LWE5NjAtM2RjZjJlYjg4YWVjNTRkMGQwY2QtM2Fi"
+url="ws://echo.websocket.org:80/"
+
+# botname="mad_bot"
+# key="OGU2M2NhODQtYTY2Zi00YWE1LWE5NjAtM2RjZjJlYjg4YWVjNTRkMGQwY2QtM2Fi"
+
+
+botname="temp_bot0719"
+# key="NjhjYTVlMjEtMjRmNi00NDdlLThmZmYtM2YyYWExNDliOGRhZWM3Y2Q1ZDgtYTdh"
+key = "NTlkMmQ1ZDUtODYwMi00ZDFkLWEzMmYtZGNiMTNkYjIxMzI2ZjQwN2U3NDItMTQy"
+
+
 def decodemsg(msgid,key):
     r = requests.session()
     r.headers["Content-Type"]="application/json; charset=utf-8"
@@ -18,14 +26,18 @@ def decodemsg(msgid,key):
     text=response["text"]
     sender=response["personId"]
     roomid=response["roomId"]
+    # print "text, sender, key is ",text,sender,roomid,key
     return [text,sender,roomid,key]
 
 def postmsg(room,text,key):  
+    count=0
     p = requests.session()
     p.headers["Content-Type"]="application/json; charset=utf-8"
     p.headers["Authorization"]="Bearer "+key
     payload={"text":str(text),"markdown":str(text),"roomId":str(room)}
+    print "payload is ",payload
     res=p.post("https://api.ciscospark.com/v1/messages/",json=payload)
+    
     #print(res)
     #print(room,text,key)
 
@@ -38,38 +50,52 @@ def on_message(ws,message):
         botname=""
         sender=""
     if data:
+
         flag=1
         botname=data["name"]
         sender=data["data"]["personEmail"]
-        msgid=data["data"]["id"]
-        decoded=decodemsg(msgid,key)
-        message=str(decoded[0]).lower()
-        sender=str(decoded[1])
-        roomID=str(decoded[2])
-        print("Message: "+message+ "\nSender:  " +sender+"\nRoom:   " +roomID+"\n key : " +decoded[3])	
-        if sender not in talkers.keys():
-            t1=fees_FSM(message,roomID)
-            talkers[sender]=t1
-        else:
-            
-            states=talkers[sender].possible_states[talkers[sender].state]
-            for possible_answer in states:
-                print(states)
-                if possible_answer in message:
-                    flag=0
-                    print("matched",possible_answer)
-                    print(talkers[sender].state)
-                    talkers[sender].state=possible_answer
-                    if(talkers[sender].state == 'final'):
-                        postmsg(talkers[sender].room,talkers[sender].questions[talkers[sender].state],key)
-                    else:                        
-                        postmsg(talkers[sender].room,talkers[sender].questions[talkers[sender].state],key)
-                        break
-            if flag:
-                talkers[sender].state="initial"
-                print("state changed to fallback")
-                print(talkers[sender])
-                postmsg(talkers[sender].room,talkers[sender].questions[talkers[sender].state],key)
+
+        if(sender == "vinitbodhwani123@gmail.com"):        
+            msgid=data["data"]["id"]
+            decoded=decodemsg(msgid,key)
+            print "decoded msge is", decoded
+            # postmsg(decoded[2],decoded[0],key)
+
+            msgid=data["data"]["id"]
+            decoded=decodemsg(msgid,key)
+            message=str(decoded[0]).lower()
+            sender=str(decoded[1])
+            roomID=str(decoded[2])
+            # print("Message: "+message+ "\nSender:  " +sender+"\nRoom:   " +roomID+"\n key : " +decoded[3])  
+            if sender not in talkers.keys():
+                t1=fees_FSM(message,roomID)
+                talkers[sender]=t1
+            else:
+                states=talkers[sender].possible_states[talkers[sender].state]
+                for possible_answer in states:
+                    # print(states)
+                    if possible_answer in message:
+                        flag=0
+                        print("matched",possible_answer)
+                        # print(talkers[sender].state)
+                        talkers[sender].state=possible_answer
+                        if(talkers[sender].state == 'final'):
+                            try:
+                                postmsg(talkers[sender].room,talkers[sender].questions[talkers[sender].state],key)
+                            except:
+                                talkers[sender].state="initial"
+                                print "done initial state"
+                                # print("state changed to fallback")
+                                # print(talkers[sender])
+                                postmsg(talkers[sender].room,talkers[sender].questions[talkers[sender].state],key)
+                        else:                        
+                            postmsg(talkers[sender].room,talkers[sender].questions[talkers[sender].state],key)
+                            break
+                if flag:
+                    talkers[sender].state="initial"
+                    # print("state changed to fallback")
+                    # print(talkers[sender])
+                    postmsg(talkers[sender].room,talkers[sender].questions[talkers[sender].state],key)
 
 def on_error(ws, error):
     print error
@@ -169,7 +195,7 @@ class fees_FSM(object):
         self.machine = Machine(model=self, states=fees_FSM.states, initial='initial')
         self.questions={
             "initial1":"",
-            "initial":"Hii, Let me get that for you. ",
+            "initial":"Hii, Let me get that for you. - Would you like to know about VIT - fees, mess, academics, placements? ",
             "fees":"Which fees would you like to know? Hostel(including the mess) or Academics ",
             "hostel":"Would You like to Know Mess Fees or Rooms?: ",
             "academics":"Which Degree would you like to purse? UnderGraduation or PostGraduation?: ",
@@ -247,6 +273,29 @@ class fees_FSM(object):
 
 
 if __name__ == "__main__":
-	ws = websocket.WebSocketApp("ws://54.245.5.208/",on_message = on_message,on_error = on_error,on_close = on_close)
-	ws.on_open = on_open
-	ws.run_forever()
+	# ws = websocket.WebSocketApp("ws://echo.websocket.org:80/",on_message = on_message,on_error = on_error,on_close = on_close)
+	# ws.on_open = on_open
+	# ws.run_forever()
+
+    # ws = websocket.WebSocketApp("ws://echo.websocket.org:80",on_message = on_message,on_error = on_error,on_close = on_close)
+    # # ws = websocket.WebSocketApp("ws://54.245.5.208/",on_message = on_message,on_error = on_error,on_close = on_close)
+    # ws.on_open = on_open
+    # ws.run_forever()
+
+
+    prev=""
+    while(True):
+        rg = requests.get("https://nlpbot.herokuapp.com/output")
+        # print "rg-text is",rg.text
+        # print "prev is ",prev
+        if(rg.text!=prev):
+            on_message("ws",rg.text)
+            prev=rg.text
+        if(rg.text=="STOP"):
+            break    
+
+
+
+
+
+
